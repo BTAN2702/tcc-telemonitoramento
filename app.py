@@ -160,9 +160,7 @@ elif menu == "Gerar Relatório PDF":
 
             for index, row in dados.iterrows():
                 pdf.cell(200, 10, txt=f"Data: {row['Data']} - PA: {row['Pressão']} - Glicemia: {row['Glicemia']} - FC: {row['Frequência']} - SpO2: {row['Saturação']} - Temp: {row['Temperatura']} - Adesão: {row['Adesão']}", ln=True)
-                pdf.multi_cell(200, 10, txt=f"Sintomas: {row['Sintomas']}")
-
-")
+               pdf.multi_cell(200, 10, txt=f"Sintomas: {row['Sintomas']}\n\n")
 
             buffer = io.BytesIO()
             pdf.output(buffer)
