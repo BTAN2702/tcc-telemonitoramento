@@ -17,6 +17,56 @@ st.markdown("""
         color: white !important;
     }
 
+    input, textarea {
+        color: black !important;
+    }
+
+    /* Primeiro botão: salvar dados do paciente */
+    .stButton > button:first-child {
+        background-color: #28a745 !important;
+        color: white !important;
+        font-weight: bold;
+        border-radius: 10px;
+        padding: 10px 20px;
+        font-size: 18px;
+        box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.3);
+        border: none;
+    }
+
+    /* Segundo botão: gerar relatório PDF */
+    .stButton > button:nth-child(1) {
+        background-color: #28a745 !important;
+        color: white !important;
+        font-weight: bold;
+        border-radius: 10px;
+        padding: 10px 20px;
+        font-size: 18px;
+        box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.3);
+        border: none;
+    }
+
+    .stDownloadButton > button {
+        background-color: #e10098;
+        color: white;
+        font-weight: bold;
+        border-radius: 10px;
+    }
+
+    .css-1d391kg, .css-1wivap2, .stDataFrame {
+        background-color: white !important;
+        color: black !important;
+        border-radius: 10px;
+        padding: 10px;
+    }
+    </style>
+    .stApp {
+        background-color: #3d0052;
+        color: white;
+    }
+    h1, h2, h3, label, .stTextInput label, .stDateInput label, .stNumberInput label, .stSelectbox label, .stTextArea label {
+        color: white !important;
+    }
+
     /* Texto dos inputs */
     input, textarea {
         color: black !important;
