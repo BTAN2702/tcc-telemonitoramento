@@ -13,6 +13,31 @@ st.markdown("""
         background-color: #3d0052;
         color: white;
     }
+    h1, h2, h3, label, .stTextInput label, .stDateInput label, .stNumberInput label, .stSelectbox label, .stTextArea label {
+        color: white !important;
+    }
+    .stButton>button {
+        background-color: #e10098;
+        color: white;
+        border-radius: 8px;
+        font-weight: bold;
+    }
+    .css-1d391kg, .css-1wivap2, .stDataFrame {
+        background-color: white !important;
+        color: black !important;
+        border-radius: 10px;
+        padding: 10px;
+    }
+    .stDownloadButton > button {
+        background-color: #e10098;
+        color: white;
+        font-weight: bold;
+    }
+    </style>
+    .stApp {
+        background-color: #3d0052;
+        color: white;
+    }
     h1, h2, h3 {
         color: #ffffff;
     }
