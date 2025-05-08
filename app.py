@@ -3,125 +3,133 @@ import streamlit as st
 import pandas as pd
 from datetime import datetime
 from fpdf import FPDF
+import io
+import base64
+import os
 
-st.set_page_config(page_title="Telemonitoramento - Relatório", layout="wide")
+st.set_page_config(page_title="Telemonitoramento CEUB", layout="wide")
 
-# CSS para estilizar botões com fundo verde e ícones
-st.markdown("""
-<style>
-.stApp {
-    background-color: #3d0052;
-    color: white;
-}
-h1, h2, h3, label,
-.stTextInput label,
-.stDateInput label,
-.stNumberInput label,
-.stSelectbox label,
-.stTextArea label {
-    color: white !important;
-}
-input, textarea {
-    color: black !important;
-    background-color: white !important;
-}
-.stTextInput > div > input,
-.stDateInput > div > input,
-.stNumberInput > div > input,
-.stTextArea > div > textarea {
-    color: black !important;
-}
+# --- Login ---
+if "autenticado" not in st.session_state:
+    st.session_state.autenticado = False
 
-/* Botões com aparência unificada */
-.stButton > button, .stDownloadButton > button {
-    background-color: #28a745 !important;
-    color: white !important;
-    font-weight: bold;
-    font-size: 18px;
-    padding: 10px 24px;
-    border-radius: 10px;
-    border: none;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-}
-.stButton > button:hover, .stDownloadButton > button:hover {
-    background-color: #218838 !important;
-}
-</style>
-""", unsafe_allow_html=True)
+if not st.session_state.autenticado:
+    st.title("🔐 Login")
+    usuario = st.text_input("Usuário")
+    senha = st.text_input("Senha", type="password")
+    if st.button("Entrar"):
+        if usuario == "admin" and senha == "1234":
+            st.session_state.autenticado = True
+            st.success("✅ Login realizado com sucesso!")
+            st.experimental_rerun()
+        else:
+            st.error("Usuário ou senha incorretos.")
+    st.stop()
 
-st.title("📋 Relatório de Telemonitoramento")
-st.subheader("Cadastre os dados clínicos dos pacientes e gere relatórios em PDF.")
+# --- Arquivo de dados persistente ---
+csv_path = "pacientes.csv"
+if os.path.exists(csv_path):
+    df = pd.read_csv(csv_path)
+else:
+    df = pd.DataFrame(columns=["Paciente", "Data", "Sintomas", "Pressão", "Glicemia", "Saturação", "Temperatura", "Frequência", "Adesão", "Próxima Visita"])
 
-if "dados" not in st.session_state:
-    st.session_state.dados = []
+# --- Menu lateral ---
+menu = st.sidebar.radio("Navegação", ["📋 Cadastro", "📈 Gráficos", "📄 Relatórios", "📥 Exportar CSV"])
 
-# Formulário
-with st.form("formulario"):
-    st.markdown("### 🧾 Cadastro de Paciente")
-    col1, col2 = st.columns([2, 1])
-    with col1:
-        nome = st.text_input("Nome do paciente")
-    with col2:
-        data = st.date_input("Data da avaliação", value=datetime.today())
-    
-    col3, col4 = st.columns(2)
-    with col3:
-        pa = st.text_input("Pressão Arterial (mmHg)")
-        glicemia = st.number_input("Glicemia (mg/dL)", min_value=0.0)
-        saturacao = st.number_input("Saturação de O2 (%)", min_value=0.0, max_value=100.0)
-    with col4:
-        temperatura = st.number_input("Temperatura (°C)", min_value=30.0, max_value=43.0)
-        frequencia = st.number_input("Frequência Cardíaca (bpm)", min_value=0.0)
-        adesao = st.selectbox("Adesão ao tratamento", ["Sim", "Não"])
-    
-    col5, col6 = st.columns([1, 2])
-    with col5:
-        proxima = st.date_input("Próxima visita sugerida")
-    with col6:
-        sintomas = st.text_area("Sintomas")
+# --- Cadastro ---
+if menu == "📋 Cadastro":
+    st.title("Cadastro de Paciente")
+    with st.form("formulario"):
+        col1, col2 = st.columns([2, 1])
+        with col1:
+            nome = st.text_input("Nome do paciente")
+        with col2:
+            data = st.date_input("Data da avaliação", value=datetime.today())
 
-    enviar = st.form_submit_button("✅ Salvar dados do paciente")
+        col3, col4 = st.columns(2)
+        with col3:
+            pa = st.text_input("Pressão Arterial (mmHg)")
+            glicemia = st.number_input("Glicemia (mg/dL)", min_value=0.0)
+            saturacao = st.number_input("Saturação de O2 (%)", min_value=0.0, max_value=100.0)
+        with col4:
+            temperatura = st.number_input("Temperatura (°C)", min_value=30.0, max_value=43.0)
+            frequencia = st.number_input("Frequência Cardíaca (bpm)", min_value=0.0)
+            adesao = st.selectbox("Adesão ao tratamento", ["Sim", "Não"])
 
-    if enviar:
-        st.session_state.dados.append({
-            "Paciente": nome,
-            "Data": str(data),
-            "Sintomas": sintomas,
-            "Pressão": pa,
-            "Glicemia": glicemia,
-            "Saturação": saturacao,
-            "Temperatura": temperatura,
-            "Frequência": frequencia,
-            "Adesão": adesao,
-            "Próxima Visita": str(proxima)
-        })
-        st.success("✅ Dados do paciente salvos!")
+        col5, col6 = st.columns([1, 2])
+        with col5:
+            proxima = st.date_input("Próxima visita sugerida")
+        with col6:
+            sintomas = st.text_area("Sintomas")
 
-# Visualização e geração de PDF
-if st.session_state.dados:
-    df = pd.DataFrame(st.session_state.dados)
-    with st.expander("📊 Visualizar dados cadastrados"):
-        st.dataframe(df)
+        enviar = st.form_submit_button("✅ Salvar dados do paciente")
+        if enviar:
+            novo = {
+                "Paciente": nome,
+                "Data": str(data),
+                "Sintomas": sintomas,
+                "Pressão": pa,
+                "Glicemia": glicemia,
+                "Saturação": saturacao,
+                "Temperatura": temperatura,
+                "Frequência": frequencia,
+                "Adesão": adesao,
+                "Próxima Visita": str(proxima)
+            }
+            df = pd.concat([df, pd.DataFrame([novo])], ignore_index=True)
+            df.to_csv(csv_path, index=False)
+            st.success("✅ Dados salvos com sucesso!")
 
-    if st.button("📄 Gerar Relatório PDF"):
-        pdf = FPDF()
-        pdf.add_page()
-        pdf.set_font("Arial", size=12)
-        for index, row in df.iterrows():
-            pdf.cell(200, 10, txt=f"Paciente: {row['Paciente']}", ln=True)
-            pdf.cell(200, 10, txt=f"Data: {row['Data']}", ln=True)
-            pdf.multi_cell(200, 10, txt=f"Sintomas: {row['Sintomas']}")
-            pdf.cell(200, 10, txt=f"PA: {row['Pressão']} - Glicemia: {row['Glicemia']} - Saturação: {row['Saturação']} - Temp: {row['Temperatura']} - FC: {row['Frequência']}", ln=True)
-            pdf.cell(200, 10, txt=f"Adesão: {row['Adesão']} - Próxima: {row['Próxima Visita']}", ln=True)
-            pdf.cell(200, 10, txt=" ", ln=True)
+# --- Gráficos ---
+elif menu == "📈 Gráficos":
+    st.title("Gráficos de Evolução Clínica")
+    if df.empty:
+        st.warning("Nenhum dado cadastrado.")
+    else:
+        paciente_opcao = st.selectbox("Selecione um paciente", df["Paciente"].unique())
+        dados_paciente = df[df["Paciente"] == paciente_opcao]
+        dados_paciente["Data"] = pd.to_datetime(dados_paciente["Data"])
 
-        pdf.output("relatorio.pdf")
-        with open("relatorio.pdf", "rb") as f:
-            PDFbyte = f.read()
+        col1, col2 = st.columns(2)
+        with col1:
+            st.line_chart(dados_paciente.set_index("Data")["Glicemia"])
+            st.line_chart(dados_paciente.set_index("Data")["Temperatura"])
+        with col2:
+            st.line_chart(dados_paciente.set_index("Data")["Frequência"])
+            st.line_chart(dados_paciente.set_index("Data")["Saturação"])
 
-        st.download_button(
-            label="📄 Baixar Relatório PDF",
-            data=PDFbyte,
-            file_name="RelatorioTelemonitoramento.pdf",
-            mime="application/pdf"
-        )
+# --- Relatórios ---
+elif menu == "📄 Relatórios":
+    st.title("📄 Gerar Relatório PDF")
+    if df.empty:
+        st.warning("Nenhum dado disponível.")
+    else:
+        paciente_escolhido = st.selectbox("Escolha o paciente", df["Paciente"].unique())
+        registros = df[df["Paciente"] == paciente_escolhido]
+
+        if st.button("📄 Gerar PDF"):
+            pdf = FPDF()
+            pdf.add_page()
+            pdf.set_font("Arial", size=12)
+            pdf.cell(200, 10, txt=f"Relatório de {paciente_escolhido}", ln=True, align="C")
+
+            for _, row in registros.iterrows():
+                pdf.cell(200, 10, txt=f"Data: {row['Data']} - PA: {row['Pressão']} - Glicemia: {row['Glicemia']} - FC: {row['Frequência']} - SpO2: {row['Saturação']} - Temp: {row['Temperatura']} - Adesão: {row['Adesão']}", ln=True)
+                pdf.multi_cell(200, 10, txt=f"Sintomas: {row['Sintomas']}
+
+")
+
+            buffer = io.BytesIO()
+            pdf.output(buffer)
+            b64 = base64.b64encode(buffer.getvalue()).decode()
+            href = f'<a href="data:application/octet-stream;base64,{b64}" download="relatorio_{paciente_escolhido}.pdf">📥 Baixar PDF</a>'
+            st.markdown(href, unsafe_allow_html=True)
+
+# --- Exportar CSV ---
+elif menu == "📥 Exportar CSV":
+    st.title("📥 Exportar Dados")
+    if df.empty:
+        st.warning("Nenhum dado para exportar.")
+    else:
+        csv = df.to_csv(index=False).encode("utf-8")
+        st.download_button("📤 Baixar arquivo CSV", data=csv, file_name="dados_pacientes.csv", mime="text/csv")
