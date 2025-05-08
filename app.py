@@ -4,172 +4,49 @@ import pandas as pd
 from datetime import datetime
 from fpdf import FPDF
 
-st.set_page_config(page_title="Relatório de Telemonitoramento", layout="wide")
+st.set_page_config(page_title="Telemonitoramento - Relatório", layout="wide")
 
-# Estilo com as cores do CEUB e botões personalizados
+# CSS para estilizar botões com fundo verde e ícones
 st.markdown("""
-    <style>
-    .stApp {
-        background-color: #3d0052;
-        color: white;
-    }
-    h1, h2, h3, label, .stTextInput label, .stDateInput label, .stNumberInput label, .stSelectbox label, .stTextArea label {
-        color: white !important;
-    }
+<style>
+.stApp {
+    background-color: #3d0052;
+    color: white;
+}
+h1, h2, h3, label,
+.stTextInput label,
+.stDateInput label,
+.stNumberInput label,
+.stSelectbox label,
+.stTextArea label {
+    color: white !important;
+}
+input, textarea {
+    color: black !important;
+    background-color: white !important;
+}
+.stTextInput > div > input,
+.stDateInput > div > input,
+.stNumberInput > div > input,
+.stTextArea > div > textarea {
+    color: black !important;
+}
 
-    input, textarea {
-        color: black !important;
-    }
-
-    /* Primeiro botão: salvar dados do paciente */
-    .stButton > button:first-child {
-        background-color: #28a745 !important;
-        color: white !important;
-        font-weight: bold;
-        border-radius: 10px;
-        padding: 10px 20px;
-        font-size: 18px;
-        box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.3);
-        border: none;
-    }
-
-    /* Segundo botão: gerar relatório PDF */
-    .stButton > button:nth-child(1) {
-        background-color: #28a745 !important;
-        color: white !important;
-        font-weight: bold;
-        border-radius: 10px;
-        padding: 10px 20px;
-        font-size: 18px;
-        box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.3);
-        border: none;
-    }
-
-    .stDownloadButton > button {
-        background-color: #e10098;
-        color: white;
-        font-weight: bold;
-        border-radius: 10px;
-    }
-
-    .css-1d391kg, .css-1wivap2, .stDataFrame {
-        background-color: white !important;
-        color: black !important;
-        border-radius: 10px;
-        padding: 10px;
-    }
-    </style>
-    .stApp {
-        background-color: #3d0052;
-        color: white;
-    }
-    h1, h2, h3, label, .stTextInput label, .stDateInput label, .stNumberInput label, .stSelectbox label, .stTextArea label {
-        color: white !important;
-    }
-
-    /* Texto dos inputs */
-    input, textarea {
-        color: black !important;
-    }
-
-    /* Botão de salvar */
-    .stButton > button:first-child {
-        background-color: #28a745 !important;
-        color: white !important;
-        font-weight: bold;
-        border-radius: 10px;
-        padding: 10px 20px;
-        font-size: 18px;
-        box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.3);
-        border: none;
-    }
-    .stButton > button:first-child::before {
-        content: "✅ ";
-    }
-
-    /* Botão de download */
-    .stDownloadButton > button {
-        background-color: #e10098;
-        color: white;
-        font-weight: bold;
-        border-radius: 10px;
-    }
-
-    .css-1d391kg, .css-1wivap2, .stDataFrame {
-        background-color: white !important;
-        color: black !important;
-        border-radius: 10px;
-        padding: 10px;
-    }
-    </style>
-    .stApp {
-        background-color: #3d0052;
-        color: white;
-    }
-    h1, h2, h3, label, .stTextInput label, .stDateInput label, .stNumberInput label, .stSelectbox label, .stTextArea label {
-        color: white !important;
-    }
-    input, textarea {
-        color: white !important;
-        background-color: white !important;
-    }
-    input[type="text"], input[type="number"], textarea {
-        background-color: #ffffff !important;
-        color: black !important;
-    }
-    .stTextInput > div > input, .stDateInput > div > input,
-    .stNumberInput > div > input, .stTextArea > div > textarea {
-        color: black !important;
-    }
-    .stButton > button:first-child {
-        background-color: #28a745 !important;
-        color: white !important;
-        font-weight: bold;
-        border-radius: 10px;
-    }
-    .stButton > button:first-child::before {
-        content: "✅ ";
-    }
-    .stDownloadButton > button {
-        background-color: #e10098;
-        color: white;
-        font-weight: bold;
-    }
-    .css-1d391kg, .css-1wivap2, .stDataFrame {
-        background-color: white !important;
-        color: black !important;
-        border-radius: 10px;
-        padding: 10px;
-    }
-    </style>
-    .stApp {
-        background-color: #3d0052;
-        color: white;
-    }
-    h1, h2, h3, label, .stTextInput label, .stDateInput label, .stNumberInput label, .stSelectbox label, .stTextArea label {
-        color: white !important;
-    }
-    .stButton > button:first-child {
-        background-color: #28a745 !important;
-        color: white !important;
-        font-weight: bold;
-        border-radius: 10px;
-    }
-    .stButton > button:first-child::before {
-        content: "✅ ";
-    }
-    .stDownloadButton > button {
-        background-color: #e10098;
-        color: white;
-        font-weight: bold;
-    }
-    .css-1d391kg, .css-1wivap2, .stDataFrame {
-        background-color: white !important;
-        color: black !important;
-        border-radius: 10px;
-        padding: 10px;
-    }
-    </style>
+/* Botões com aparência unificada */
+.stButton > button, .stDownloadButton > button {
+    background-color: #28a745 !important;
+    color: white !important;
+    font-weight: bold;
+    font-size: 18px;
+    padding: 10px 24px;
+    border-radius: 10px;
+    border: none;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+.stButton > button:hover, .stDownloadButton > button:hover {
+    background-color: #218838 !important;
+}
+</style>
 """, unsafe_allow_html=True)
 
 st.title("📋 Relatório de Telemonitoramento")
@@ -178,18 +55,15 @@ st.subheader("Cadastre os dados clínicos dos pacientes e gere relatórios em PD
 if "dados" not in st.session_state:
     st.session_state.dados = []
 
-# Formulário com layout ajustado
-with st.form("formulario_paciente"):
+# Formulário
+with st.form("formulario"):
     st.markdown("### 🧾 Cadastro de Paciente")
-
-    # Linha 1
     col1, col2 = st.columns([2, 1])
     with col1:
         nome = st.text_input("Nome do paciente")
     with col2:
         data = st.date_input("Data da avaliação", value=datetime.today())
-
-    # Linha 2
+    
     col3, col4 = st.columns(2)
     with col3:
         pa = st.text_input("Pressão Arterial (mmHg)")
@@ -199,18 +73,17 @@ with st.form("formulario_paciente"):
         temperatura = st.number_input("Temperatura (°C)", min_value=30.0, max_value=43.0)
         frequencia = st.number_input("Frequência Cardíaca (bpm)", min_value=0.0)
         adesao = st.selectbox("Adesão ao tratamento", ["Sim", "Não"])
-
-    # Linha 3
+    
     col5, col6 = st.columns([1, 2])
     with col5:
         proxima = st.date_input("Próxima visita sugerida")
     with col6:
         sintomas = st.text_area("Sintomas")
 
-    enviar = st.form_submit_button("Salvar dados do paciente")
+    enviar = st.form_submit_button("✅ Salvar dados do paciente")
 
     if enviar:
-        novo = {
+        st.session_state.dados.append({
             "Paciente": nome,
             "Data": str(data),
             "Sintomas": sintomas,
@@ -221,10 +94,10 @@ with st.form("formulario_paciente"):
             "Frequência": frequencia,
             "Adesão": adesao,
             "Próxima Visita": str(proxima)
-        }
-        st.session_state.dados.append(novo)
+        })
         st.success("✅ Dados do paciente salvos!")
 
+# Visualização e geração de PDF
 if st.session_state.dados:
     df = pd.DataFrame(st.session_state.dados)
     with st.expander("📊 Visualizar dados cadastrados"):
@@ -247,11 +120,8 @@ if st.session_state.dados:
             PDFbyte = f.read()
 
         st.download_button(
-            label="📥 Baixar Relatório em PDF",
+            label="📄 Baixar Relatório PDF",
             data=PDFbyte,
             file_name="RelatorioTelemonitoramento.pdf",
             mime="application/pdf"
         )
-        st.success("✅ PDF gerado com sucesso!")
-else:
-    st.info("Nenhum paciente cadastrado ainda.")
