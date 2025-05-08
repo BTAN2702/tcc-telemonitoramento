@@ -5,6 +5,35 @@ from datetime import datetime
 from fpdf import FPDF
 import io
 import base64
+
+st.markdown("""
+<style>
+body {
+    background-color: #3d0052;
+}
+.stApp {
+    background-color: #3d0052;
+    color: white;
+}
+h1, h2, h3, .stTextInput label, .stTextArea label, .stNumberInput label, .stSelectbox label {
+    color: white;
+}
+.stButton>button {
+    background-color: #e10098;
+    color: white;
+    font-weight: bold;
+    border-radius: 10px;
+    padding: 10px 20px;
+}
+.stDownloadButton>button {
+    background-color: #00b33c;
+    color: white;
+    font-weight: bold;
+    border-radius: 10px;
+}
+</style>
+""", unsafe_allow_html=True)
+
 import os
 
 st.set_page_config(page_title="Telemonitoramento CEUB", layout="wide")
@@ -117,9 +146,8 @@ elif menu == "📄 Relatórios":
                 pdf.cell(200, 10, txt=f"Data: {row['Data']} - PA: {row['Pressão']} - Glicemia: {row['Glicemia']} - FC: {row['Frequência']} - SpO2: {row['Saturação']} - Temp: {row['Temperatura']} - Adesão: {row['Adesão']}", ln=True)
                 pdf.multi_cell(200, 10, txt=f"Sintomas: {row['Sintomas']}\n\n")
 
-            buffer = io.BytesIO()
-            pdf.output(buffer)
-            b64 = base64.b64encode(buffer.getvalue()).decode()
+            pdf_bytes = pdf.output(dest='S').encode('latin1')
+            b64 = base64.b64encode(pdf_bytes).decode()
             href = f'<a href="data:application/octet-stream;base64,{b64}" download="relatorio_{paciente_escolhido}.pdf">📥 Baixar PDF</a>'
             st.markdown(href, unsafe_allow_html=True)
 
