@@ -4,6 +4,7 @@ import pandas as pd
 from datetime import datetime
 from fpdf import FPDF
 import io
+st.set_page_config(page_title="Telemonitoramento CEUB", layout="wide")
 import base64
 
 st.markdown("""
@@ -36,7 +37,6 @@ h1, h2, h3, .stTextInput label, .stTextArea label, .stNumberInput label, .stSele
 
 import os
 
-st.set_page_config(page_title="Telemonitoramento CEUB", layout="wide")
 
 # --- Login ---
 if "autenticado" not in st.session_state:
