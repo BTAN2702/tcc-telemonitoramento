@@ -1,11 +1,10 @@
-
 import streamlit as st
 st.set_page_config(page_title='Telemonitoramento CEUB', layout='wide')
+
 import pandas as pd
 from datetime import datetime
 from fpdf import FPDF
 import io
-st.set_page_config(page_title="Telemonitoramento CEUB", layout="wide")
 import base64
 
 st.markdown("""
