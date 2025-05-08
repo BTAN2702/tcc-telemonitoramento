@@ -20,8 +20,8 @@ if not st.session_state.autenticado:
     if st.button("Entrar"):
         if usuario == "admin" and senha == "1234":
             st.session_state.autenticado = True
-            st.success("✅ Login realizado com sucesso!")
-            st.rerun()
+            st.success("✅ Login realizado com sucesso! Você será redirecionado automaticamente.")
+            st.stop()
         else:
             st.error("Usuário ou senha incorretos.")
     st.stop()
