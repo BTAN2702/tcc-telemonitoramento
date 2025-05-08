@@ -6,7 +6,7 @@ from fpdf import FPDF
 
 st.set_page_config(page_title="Relatório de Telemonitoramento", layout="wide")
 
-# Estilo com as cores do CEUB
+# Estilo com as cores do CEUB e botões personalizados
 st.markdown("""
     <style>
     .stApp {
@@ -16,10 +16,18 @@ st.markdown("""
     h1, h2, h3, label, .stTextInput label, .stDateInput label, .stNumberInput label, .stSelectbox label, .stTextArea label {
         color: white !important;
     }
-    .stButton>button {
+    .stButton > button:first-child {
+        background-color: #28a745 !important;
+        color: white !important;
+        font-weight: bold;
+        border-radius: 10px;
+    }
+    .stButton > button:first-child::before {
+        content: "✅ ";
+    }
+    .stDownloadButton > button {
         background-color: #e10098;
         color: white;
-        border-radius: 8px;
         font-weight: bold;
     }
     .css-1d391kg, .css-1wivap2, .stDataFrame {
@@ -27,36 +35,6 @@ st.markdown("""
         color: black !important;
         border-radius: 10px;
         padding: 10px;
-    }
-    .stDownloadButton > button {
-        background-color: #e10098;
-        color: white;
-        font-weight: bold;
-    }
-    </style>
-    .stApp {
-        background-color: #3d0052;
-        color: white;
-    }
-    h1, h2, h3 {
-        color: #ffffff;
-    }
-    .stButton>button {
-        background-color: #e10098;
-        color: white;
-        border-radius: 8px;
-        font-weight: bold;
-    }
-    .css-1d391kg, .css-1wivap2, .stDataFrame {
-        background-color: white !important;
-        color: black !important;
-        border-radius: 10px;
-        padding: 10px;
-    }
-    .stDownloadButton > button {
-        background-color: #e10098;
-        color: white;
-        font-weight: bold;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -67,23 +45,33 @@ st.subheader("Cadastre os dados clínicos dos pacientes e gere relatórios em PD
 if "dados" not in st.session_state:
     st.session_state.dados = []
 
-# Formulário com colunas para melhor visualização
+# Formulário com layout ajustado
 with st.form("formulario_paciente"):
     st.markdown("### 🧾 Cadastro de Paciente")
 
-    col1, col2 = st.columns(2)
+    # Linha 1
+    col1, col2 = st.columns([2, 1])
     with col1:
         nome = st.text_input("Nome do paciente")
+    with col2:
         data = st.date_input("Data da avaliação", value=datetime.today())
+
+    # Linha 2
+    col3, col4 = st.columns(2)
+    with col3:
         pa = st.text_input("Pressão Arterial (mmHg)")
         glicemia = st.number_input("Glicemia (mg/dL)", min_value=0.0)
         saturacao = st.number_input("Saturação de O2 (%)", min_value=0.0, max_value=100.0)
-
-    with col2:
+    with col4:
         temperatura = st.number_input("Temperatura (°C)", min_value=30.0, max_value=43.0)
         frequencia = st.number_input("Frequência Cardíaca (bpm)", min_value=0.0)
         adesao = st.selectbox("Adesão ao tratamento", ["Sim", "Não"])
+
+    # Linha 3
+    col5, col6 = st.columns([1, 2])
+    with col5:
         proxima = st.date_input("Próxima visita sugerida")
+    with col6:
         sintomas = st.text_area("Sintomas")
 
     enviar = st.form_submit_button("Salvar dados do paciente")
