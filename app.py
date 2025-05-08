@@ -16,6 +16,46 @@ st.markdown("""
     h1, h2, h3, label, .stTextInput label, .stDateInput label, .stNumberInput label, .stSelectbox label, .stTextArea label {
         color: white !important;
     }
+    input, textarea {
+        color: white !important;
+        background-color: white !important;
+    }
+    input[type="text"], input[type="number"], textarea {
+        background-color: #ffffff !important;
+        color: black !important;
+    }
+    .stTextInput > div > input, .stDateInput > div > input,
+    .stNumberInput > div > input, .stTextArea > div > textarea {
+        color: black !important;
+    }
+    .stButton > button:first-child {
+        background-color: #28a745 !important;
+        color: white !important;
+        font-weight: bold;
+        border-radius: 10px;
+    }
+    .stButton > button:first-child::before {
+        content: "✅ ";
+    }
+    .stDownloadButton > button {
+        background-color: #e10098;
+        color: white;
+        font-weight: bold;
+    }
+    .css-1d391kg, .css-1wivap2, .stDataFrame {
+        background-color: white !important;
+        color: black !important;
+        border-radius: 10px;
+        padding: 10px;
+    }
+    </style>
+    .stApp {
+        background-color: #3d0052;
+        color: white;
+    }
+    h1, h2, h3, label, .stTextInput label, .stDateInput label, .stNumberInput label, .stSelectbox label, .stTextArea label {
+        color: white !important;
+    }
     .stButton > button:first-child {
         background-color: #28a745 !important;
         color: white !important;
