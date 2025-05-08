@@ -1,5 +1,6 @@
 
 import streamlit as st
+st.set_page_config(page_title='Telemonitoramento CEUB', layout='wide')
 import pandas as pd
 from datetime import datetime
 from fpdf import FPDF
@@ -51,7 +52,7 @@ if not st.session_state.autenticado:
             st.session_state.autenticado = True
             st.session_state.usuario = usuario
             st.success("✅ Login realizado com sucesso!")
-            st.experimental_rerun()
+            st.rerun()
         else:
             st.error("Usuário ou senha incorretos.")
         st.stop()
