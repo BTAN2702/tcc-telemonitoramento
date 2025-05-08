@@ -168,6 +168,7 @@ elif menu == "📥 Exportar CSV":
         csv = df.to_csv(index=False).encode("utf-8")
         st.download_button("📤 Baixar arquivo CSV", data=csv, file_name="dados_pacientes.csv", mime="text/csv")
 # --- Telas do paciente ---
+perfil = st.session_state.get('usuario', 'Paciente')
 if perfil == "Paciente":
     if menu == "Autoavaliação":
         st.title("📋 Autoavaliação Clínica")
