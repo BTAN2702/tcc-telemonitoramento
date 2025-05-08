@@ -21,7 +21,7 @@ if not st.session_state.autenticado:
         if usuario == "admin" and senha == "1234":
             st.session_state.autenticado = True
             st.success("✅ Login realizado com sucesso!")
-            st.experimental_rerun()
+            st.rerun()
         else:
             st.error("Usuário ou senha incorretos.")
     st.stop()
