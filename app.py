@@ -159,3 +159,46 @@ elif menu == "📥 Exportar CSV":
     else:
         csv = df.to_csv(index=False).encode("utf-8")
         st.download_button("📤 Baixar arquivo CSV", data=csv, file_name="dados_pacientes.csv", mime="text/csv")
+# --- Telas do paciente ---
+if perfil == "Paciente":
+    if menu == "Autoavaliação":
+        st.title("📋 Autoavaliação Clínica")
+        with st.form("form_auto"):
+            nome = st.text_input("Seu nome completo")
+            data = st.date_input("Data", value=datetime.today())
+            sintomas = st.text_area("Como você está se sentindo?")
+            pa = st.text_input("Pressão Arterial (mmHg)")
+            glicemia = st.number_input("Glicemia (mg/dL)", min_value=0.0)
+            fc = st.number_input("Frequência Cardíaca (bpm)", min_value=0.0)
+            spo2 = st.number_input("Saturação de O2 (%)", min_value=0.0, max_value=100.0)
+            temperatura = st.number_input("Temperatura (°C)", min_value=30.0, max_value=43.0)
+            enviar = st.form_submit_button("✅ Enviar")
+            if enviar:
+                novo = {
+                    "Paciente": nome,
+                    "Data": data,
+                    "Pressão": pa,
+                    "Glicemia": glicemia,
+                    "Frequência": fc,
+                    "Saturação": spo2,
+                    "Temperatura": temperatura,
+                    "Sintomas": sintomas,
+                    "Adesão": "Não informado",
+                    "Próxima Visita": ""
+                }
+                st.session_state.registros.append(novo)
+                st.success("✅ Dados enviados com sucesso!")
+
+    elif menu == "Meus Registros":
+        st.title("📊 Meus Registros")
+        if not st.session_state.registros:
+            st.warning("Nenhum dado registrado ainda.")
+        else:
+            nome = st.text_input("Confirme seu nome para ver seus dados:")
+            df = pd.DataFrame(st.session_state.registros)
+            meus = df[df["Paciente"] == nome]
+            if not meus.empty:
+                st.dataframe(meus)
+                st.line_chart(meus.set_index("Data")[["Glicemia", "Temperatura", "Frequência"]])
+            else:
+                st.info("Nenhum registro encontrado com esse nome.")
