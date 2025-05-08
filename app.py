@@ -47,6 +47,14 @@ if not st.session_state.autenticado:
     usuario = st.text_input("Usuário")
     senha = st.text_input("Senha", type="password")
     if st.button("Entrar"):
+        if usuario in ["admin", "paciente"] and senha == "1234":
+            st.session_state.autenticado = True
+            st.session_state.usuario = usuario
+            st.success("✅ Login realizado com sucesso!")
+            st.experimental_rerun()
+        else:
+            st.error("Usuário ou senha incorretos.")
+        st.stop()
         if usuario == "admin" and senha == "1234":
             st.session_state.autenticado = True
             st.success("✅ Login realizado com sucesso! Você será redirecionado automaticamente.")
