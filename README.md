@@ -1,33 +1,46 @@
 
-# 📋 Telemonitoramento CEUB
+# 🩺 Aplicativo de Telemonitoramento CEUB
 
-Este projeto é um aplicativo desenvolvido com [Streamlit](https://streamlit.io/) para auxiliar no **telemonitoramento de pacientes** da Clínica Escola de Enfermagem do CEUB.
+Este repositório contém um sistema web interativo para **telemonitoramento de pacientes crônicos**, desenvolvido como parte do Trabalho de Conclusão de Curso em Enfermagem no CEUB (Centro Universitário de Brasília).
 
 ## 🎯 Objetivo
 
-Permitir que profissionais de saúde possam:
-- Registrar dados clínicos de pacientes em acompanhamento
-- Visualizar esses dados em tempo real
-- Gerar relatórios em PDF com todas as informações
+Facilitar o acompanhamento clínico remoto de pacientes atendidos na clínica escola de enfermagem do CEUB, permitindo:
 
-## 🛠 Tecnologias utilizadas
+- Cadastro de pacientes e coleta de indicadores clínicos
+- Monitoramento contínuo e visualização gráfica da evolução
+- Geração de relatórios em PDF
+- Exportação de dados em CSV
+- Interface segura com login
 
-- `streamlit` – para interface web interativa
-- `pandas` – para manipulação de dados clínicos
-- `fpdf` – para geração dos relatórios em PDF
+## 🚀 Funcionalidades
 
-## 🎨 Identidade Visual
+- ✅ **Login simples** para acesso seguro
+- ✅ **Cadastro de pacientes** e indicadores (PA, glicemia, FC, temperatura, sintomas...)
+- ✅ **Gráficos de evolução clínica**
+- ✅ **Filtro por paciente**
+- ✅ **Geração de relatório PDF com histórico**
+- ✅ **Exportação de dados em .csv**
+- ✅ **Salvamento persistente em arquivo CSV**
+- ✅ **Interface com menu lateral e cores do CEUB**
 
-A interface do sistema utiliza as **cores institucionais do CEUB**:
-- Fundo: Roxo escuro (`#3d0052`)
-- Destaques e botões: Rosa (`#e10098`)
-- Textos: Branco
+## 🛠 Tecnologias Utilizadas
 
-## 📦 Instalação
+- [Streamlit](https://streamlit.io/) – desenvolvimento da interface web
+- [Pandas](https://pandas.pydata.org/) – manipulação dos dados clínicos
+- [FPDF](https://pyfpdf.github.io/fpdf2/) – geração de relatórios PDF
 
-1. Clone este repositório:
+## 🧑‍⚕️ Público-alvo
+
+- Estudantes e profissionais de enfermagem
+- Equipes multidisciplinares
+- Clínicas escola ou centros de atenção comunitária
+
+## 📦 Instalação Local
+
+1. Clone o repositório:
 ```bash
-git clone https://github.com/BTAN2702/tcc-telemonitoramento.git
+git clone https://github.com/seuusuario/tcc-telemonitoramento.git
 cd tcc-telemonitoramento
 ```
 
@@ -36,33 +49,27 @@ cd tcc-telemonitoramento
 pip install -r requirements.txt
 ```
 
-3. Execute a aplicação:
+3. Execute o aplicativo:
 ```bash
 streamlit run app.py
 ```
 
-## 📄 Relatórios
+## ☁️ Deploy no Streamlit Cloud
 
-Após cadastrar os pacientes e inserir os dados clínicos, é possível gerar um relatório em PDF com:
-- Dados de avaliação (PA, glicemia, temperatura etc.)
-- Relato de sintomas
-- Adesão ao tratamento
-- Próxima visita
-
-O arquivo gerado pode ser baixado diretamente pela interface.
-
-## 👨‍⚕️ Público-alvo
-
-- Estudantes e profissionais de enfermagem
-- Equipe multiprofissional da clínica escola
-- Projetos de TCC e monitoramento acadêmico
-
-## 📌 Autor
-
-Desenvolvido por **Artur Nascimento Bittencourt**  
-Projeto de Trabalho de Conclusão de Curso (TCC) – CEUB 2025  
-Contato: artur.bittencourt@sempreceub.com
+1. Crie um repositório no GitHub com este conteúdo
+2. Acesse [Streamlit Cloud](https://streamlit.io/cloud)
+3. Conecte com seu GitHub e selecione o repositório
+4. Defina o arquivo principal como `app.py`
+5. Clique em **Deploy** 🚀
 
 ---
 
-*Este repositório faz parte de um projeto acadêmico de implementação de ferramentas digitais na assistência em saúde.*
+## 📄 Licença
+
+Este projeto é acadêmico e livre para fins educacionais.
+
+---
+
+**Desenvolvido por:**  
+Artur Nascimento Bittencourt – TCC Enfermagem CEUB (2025)  
+📧 artur.bittencourt@sempreceub.com
