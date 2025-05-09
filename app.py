@@ -1,52 +1,73 @@
-
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+import bcrypt
+import sqlite3
 from datetime import datetime
 from fpdf import FPDF
 import base64
-import os
 
 st.set_page_config(page_title="Telemonitoramento CEUB", layout="wide")
 
-USUARIOS_CSV = "usuarios.csv"
-DADOS_CSV = "dados.csv"
+# ---------------- Database Setup ----------------
+def init_db():
+    conn = sqlite3.connect("telemonitoramento.db")
+    c = conn.cursor()
+    c.execute('''CREATE TABLE IF NOT EXISTS usuarios 
+                 (usuario TEXT PRIMARY KEY, senha TEXT, perfil TEXT)''')
+    c.execute('''CREATE TABLE IF NOT EXISTS registros 
+                 (id INTEGER PRIMARY KEY AUTOINCREMENT, paciente TEXT, data TEXT, sintomas TEXT, 
+                  pressao TEXT, glicemia REAL, frequencia REAL, saturacao REAL, temperatura REAL, 
+                  adesao TEXT, proxima_visita TEXT)''')
+    conn.commit()
+    conn.close()
 
-def carregar_usuarios():
-    if os.path.exists(USUARIOS_CSV):
-        return pd.read_csv(USUARIOS_CSV)
-    else:
-        df = pd.DataFrame(columns=["usuario", "senha", "perfil"])
-        df.to_csv(USUARIOS_CSV, index=False)
-        return df
-
-def salvar_usuario(usuario, senha, perfil):
-    df = carregar_usuarios()
-    if usuario in df["usuario"].values:
+def add_user(usuario, senha, perfil):
+    conn = sqlite3.connect("telemonitoramento.db")
+    c = conn.cursor()
+    hashed = bcrypt.hashpw(senha.encode(), bcrypt.gensalt())
+    try:
+        c.execute("INSERT INTO usuarios (usuario, senha, perfil) VALUES (?, ?, ?)", 
+                  (usuario, hashed, perfil))
+        conn.commit()
+    except sqlite3.IntegrityError:
         return False
-    df = pd.concat([df, pd.DataFrame([[usuario, senha, perfil]], columns=["usuario", "senha", "perfil"])]).reset_index(drop=True)
-    df.to_csv(USUARIOS_CSV, index=False)
+    finally:
+        conn.close()
     return True
 
-def carregar_dados():
-    if os.path.exists(DADOS_CSV):
-        return pd.read_csv(DADOS_CSV)
-    else:
-        df = pd.DataFrame(columns=["Paciente", "Data", "Sintomas", "Pressao", "Glicemia", "Frequencia", 
-                                   "Saturacao", "Temperatura", "Adesao", "ProximaVisita"])
-        df.to_csv(DADOS_CSV, index=False)
-        return df
+def validate_login(usuario, senha):
+    conn = sqlite3.connect("telemonitoramento.db")
+    c = conn.cursor()
+    c.execute("SELECT senha, perfil FROM usuarios WHERE usuario=?", (usuario,))
+    result = c.fetchone()
+    conn.close()
+    if result and bcrypt.checkpw(senha.encode(), result[0]):
+        return result[1]  # Retorna o perfil
+    return None
 
-def salvar_dado(registro):
-    df = carregar_dados()
-    df = pd.concat([df, pd.DataFrame([registro])]).reset_index(drop=True)
-    df.to_csv(DADOS_CSV, index=False)
+def save_record(record):
+    conn = sqlite3.connect("telemonitoramento.db")
+    c = conn.cursor()
+    c.execute('''INSERT INTO registros (paciente, data, sintomas, pressao, glicemia, frequencia, 
+                saturacao, temperatura, adesao, proxima_visita) VALUES (?,?,?,?,?,?,?,?,?,?)''', 
+                (record["Paciente"], record["Data"], record["Sintomas"], record["Pressao"], 
+                 record["Glicemia"], record["Frequencia"], record["Saturacao"], 
+                 record["Temperatura"], record["Adesao"], record["ProximaVisita"]))
+    conn.commit()
+    conn.close()
+def get_records():
+    conn = sqlite3.connect("telemonitoramento.db")
+    c = conn.cursor()
+    c.execute("SELECT * FROM registros")
+    records = c.fetchall()
+    conn.close()
+    cols = ["ID", "Paciente", "Data", "Sintomas", "Pressao", "Glicemia", "Frequencia", 
+            "Saturacao", "Temperatura", "Adesao", "ProximaVisita"]
+    return pd.DataFrame(records, columns=cols)
 
-def gerar_link_csv():
-    with open(DADOS_CSV, "rb") as f:
-        b64 = base64.b64encode(f.read()).decode()
-    href = f'<a href="data:file/csv;base64,{b64}" download="dados.csv">📥 Baixar CSV</a>'
-    return href
+# ---------------- Início da Aplicação ----------------
+init_db()
 
 if "autenticado" not in st.session_state:
     st.session_state.autenticado = False
@@ -57,40 +78,42 @@ if not st.session_state.autenticado:
     senha = st.text_input("Senha", type="password")
 
     if st.button("Entrar"):
-        usuarios = carregar_usuarios()
-        user = usuarios[(usuarios["usuario"] == usuario) & (usuarios["senha"] == senha)]
-        if not user.empty:
+        perfil = validate_login(usuario, senha)
+        if perfil:
             st.session_state.autenticado = True
             st.session_state.usuario = usuario
-            st.session_state.perfil = user.iloc[0]["perfil"]
+            st.session_state.perfil = perfil
             st.success(f"✅ Bem-vindo, {usuario}!")
             st.experimental_rerun()
         else:
             st.error("Usuário ou senha incorretos.")
-
-    if st.button("Registrar Novo Usuário"):
-        with st.form("form_cadastro"):
-            new_user = st.text_input("Novo Usuário")
-            new_pass = st.text_input("Nova Senha", type="password")
-            perfil = st.selectbox("Perfil", ["admin", "paciente"])
-            if st.form_submit_button("Cadastrar"):
-                if salvar_usuario(new_user, new_pass, perfil):
-                    st.success("✅ Usuário cadastrado!")
-                else:
-                    st.warning("⚠️ Usuário já existe!")
     st.stop()
 
-perfil = st.session_state.get("perfil", "paciente")
-st.sidebar.markdown(f"👤 Logado como: **{st.session_state.usuario}**")
+# ---------------- Interface Principal ----------------
+perfil = st.session_state.perfil
+st.sidebar.markdown(f"👤 Logado como: **{st.session_state.usuario} ({perfil})**")
+
+if perfil == "admin" and st.sidebar.button("👥 Cadastrar Usuário"):
+    with st.form("form_cadastro"):
+        new_user = st.text_input("Novo Usuário")
+        new_pass = st.text_input("Nova Senha", type="password")
+        new_perfil = st.selectbox("Perfil", ["admin", "paciente"])
+        if st.form_submit_button("Cadastrar"):
+            if add_user(new_user, new_pass, new_perfil):
+                st.success("✅ Usuário cadastrado com sucesso!")
+            else:
+                st.warning("⚠️ Usuário já existe!")
+
 if st.sidebar.button("🚪 Sair"):
     st.session_state.autenticado = False
     st.session_state.usuario = None
     st.experimental_rerun()
 
-data = carregar_dados()
-
-menu_prof = ["🏥 Cadastro de Paciente", "📋 Registro Clínico", "📊 Painel de Monitoramento", "📈 Gráficos de Evolução", "📄 Exportar CSV"]
+data = get_records()
+menu_prof = ["🏥 Cadastro de Paciente", "📋 Registro Clínico", "📊 Painel de Monitoramento", 
+              "📈 Gráficos de Evolução", "📄 Exportar CSV"]
 menu_pac = ["📝 Autoavaliação", "📚 Meus Registros"]
+
 menu = st.sidebar.radio("Menu", menu_prof if perfil == "admin" else menu_pac)
 
 if perfil == "admin":
@@ -110,7 +133,7 @@ if perfil == "admin":
 
             if st.form_submit_button("✅ Salvar Dados"):
                 if nome:
-                    salvar_dado({
+                    save_record({
                         "Paciente": nome, "Data": data_atual, "Sintomas": sintomas,
                         "Pressao": pa, "Glicemia": glicemia, "Frequencia": fc,
                         "Saturacao": spo2, "Temperatura": temperatura,
@@ -122,7 +145,8 @@ if perfil == "admin":
 
     elif menu == "📄 Exportar CSV":
         st.title("📄 Exportação de Dados")
-        st.markdown(gerar_link_csv(), unsafe_allow_html=True)
+        csv = data.to_csv(index=False).encode('utf-8')
+        st.download_button("📥 Baixar CSV", data=csv, file_name="dados.csv", mime="text/csv")
 
     elif menu == "📊 Painel de Monitoramento":
         st.title("📊 Monitoramento de Pacientes")
@@ -138,7 +162,6 @@ if perfil == "admin":
             st.plotly_chart(fig)
         else:
             st.warning("Nenhum dado encontrado para este paciente.")
-
 elif perfil == "paciente":
     if menu == "📝 Autoavaliação":
         st.title("📝 Autoavaliação")
@@ -153,7 +176,7 @@ elif perfil == "paciente":
             temperatura = st.number_input("Temperatura")
 
             if st.form_submit_button("✅ Enviar"):
-                salvar_dado({
+                save_record({
                     "Paciente": nome, "Data": data_atual, "Sintomas": sintomas,
                     "Pressao": pa, "Glicemia": glicemia, "Frequencia": fc,
                     "Saturacao": spo2, "Temperatura": temperatura,
